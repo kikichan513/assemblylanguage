@@ -1,0 +1,6 @@
+.section init
+r0 := 0
+r2 := endstack
+.temp r6, r7
+	goto main linking r1
+	halt

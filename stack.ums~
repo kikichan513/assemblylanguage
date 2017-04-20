@@ -1,0 +1,10 @@
+.section init
+.temps r6, r7
+
+.section stk
+.space 100000
+endstack:
+
+.section rodata
+jumptable: 
+.space 256

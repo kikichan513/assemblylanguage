@@ -1,0 +1,448 @@
+######################################################################
+#                                                                    #
+#      By Dakota LeRoy and Chan Hiu Ki, Thursday December 1st, 2016  #
+#      Assemly-Language Programming                                  #
+#                                                                    #
+#      calc.ums holds labels and implementation for calculator       #
+#      and for calculator commands and operations                    #
+#                                                                    #
+######################################################################
+
+
+############################# MAIN ##################################
+#								    #
+# Pushes r1 to save location address to return to callmain and halt #
+#                    when the program is over                       #
+#								    #
+#####################################################################
+# Registers                                                         #
+#	r1: holds location address to return to callmain            #
+#       r2: holds call stack pointer                                #
+#       r3: holds value stack pointer                               #
+#       r4: holds counter value to initialize jumptable             #
+#       r6: temporary register                                      #
+#       r7: temporary register                                      #
+#####################################################################
+
+.section text
+.temp r6, r7
+main:
+	push r1 on stack r2
+	r4 := 0
+	push r3 on stack r2
+	goto jumpinit
+
+########################## JUMPTABLE ################################
+#								    #
+#   Initializes all of jumptable to the input_error label before    #
+#          setting supported input to corresponding labels          #
+#								    #
+#####################################################################
+# Registers                                                         #
+#       r2: holds call stack pointer                                #
+#       r3: location of jumptable + counter                         #
+#       r4: holds counter value to initialize jumptable             #
+#       r5: used when calling jumpinit                              #
+#       r6: temporary register                                      #
+#       r7: temporary register                                      #
+#####################################################################
+
+jumpinit:
+.temp r6, r7
+	
+	r3 := jumptable + r4
+	m[r0][r3] := input_error
+	r4 := r4 + 1
+	if (r4 <=s 256) goto jumpinit using r5
+	pop r3 off stack r2
+
+	m[r0][jumptable + '0'] := digit
+	m[r0][jumptable + '1'] := digit
+	m[r0][jumptable + '2'] := digit
+	m[r0][jumptable + '3'] := digit
+	m[r0][jumptable + '4'] := digit 
+	m[r0][jumptable + '5'] := digit 
+	m[r0][jumptable + '6'] := digit
+	m[r0][jumptable + '7'] := digit
+	m[r0][jumptable + '8'] := digit
+	m[r0][jumptable + '9'] := digit
+	m[r0][jumptable + ' '] := waiting
+	m[r0][jumptable + '\n']:= print
+	m[r0][jumptable + '+'] := add
+	m[r0][jumptable + '-'] := sub
+	m[r0][jumptable + '*'] := mul
+	m[r0][jumptable + '/'] := div
+	m[r0][jumptable + '|']:= or
+	m[r0][jumptable + '&'] := and
+	m[r0][jumptable + 'c'] := change
+	m[r0][jumptable + '~'] := com
+	m[r0][jumptable + 's'] := swap
+	m[r0][jumptable + 'd'] := dup
+	m[r0][jumptable + 'p'] := pop_vstack
+	m[r0][jumptable + 'z'] := rem
+	goto waiting using r5
+
+##################### WAITING AND ENTERING ##########################
+#								    #
+#      Waiting state takes input from user and transitions to       #
+#   enterting, performs operations based on user's command. If the  #
+#  command is not supported it throws and error. If the suer inputs #
+#                 End of File, the program ends.                    #
+#								    #
+#####################################################################
+# Registers                                                         #
+#       r1: holds input                                             #
+#	r2: holds call stack pointer                                #
+#       r3: holds value stack pointer                               #
+#       r4: holds counter value to initialize jumptable             #
+#       r5: location of label corresponding to input                #
+#       r6: temporary register                                      #
+#       r7: temporary register                                      #
+#####################################################################
+
+waiting:
+	r1 := input()
+
+entering:
+	r5 := ~0
+	if (r1 == r5)  goto end using r4
+	r5 := jumptable + r1
+	r5 := m[r0][r5]
+	goto r5
+
+####################### WAITING WITH DIGIT ##########################
+#								    #
+#      Program enters this state when a digit has already been      #
+#    entered and it waits to see if another digit will be entered   #
+#       by the user to store it as a mutidigit value. If a digit    #
+#          is not provided it returns to entering state.            #
+#								    #
+#####################################################################
+# Registers                                                         #
+#       r1: holds input                                             #
+#	r2: holds call stack pointer                                #
+#       r3: holds value stack pointer                               #
+#       r4: holds counter value to initialize jumptable             #
+#       r5: location of label corresponding to input                #
+#       r6: temporary register                                      #
+#       r7: temporary register                                      #
+#####################################################################
+
+waiting_with_digit:
+	r1 := input()
+	if (r1 == 48) goto continue_digit using r5
+	if (r1 == 49) goto continue_digit using r5
+	if (r1 == 50) goto continue_digit using r5
+	if (r1 == 51) goto continue_digit using r5
+	if (r1 == 52) goto continue_digit using r5
+	if (r1 == 53) goto continue_digit using r5
+	if (r1 == 54) goto continue_digit using r5
+	if (r1 == 55) goto continue_digit using r5
+	if (r1 == 56) goto continue_digit using r5
+	if (r1 == 57) goto continue_digit using r5
+	goto entering
+
+continue_digit:
+	pop r4 off stack r3
+	r4 := r4 * 10
+	r1 := r1 - 48
+	r4 := r4 + r1
+	push r4 on stack r3
+	goto waiting_with_digit
+
+######################### DIGIT ###########################
+# r1 contains unput, which is converted to decimal and pushed
+# onto the value stack before transitioning to the waiting
+# with digit state
+.section text
+digit:
+	# Converts input to decimal
+	r1 := r1 - 48  
+	push r1 on stack r3
+	goto waiting_with_digit
+ 
+###################### PUSH_VSTACK ########################
+# r1 contains input, which is pushed onto the value stack
+# before returning to entering state 
+push_vstack:
+	push r1 on stack r3
+	goto entering
+
+######################### PRINT ###########################
+print:
+	r5 := r3
+	push r5 on stack r2
+
+print_part_two:
+
+	if (r3 == endvstack) goto update_stack using r4
+	r5 := m[r0][r3]
+	goto print1 linking r1
+	r3 := r3 + 1
+	goto print_part_two
+
+update_stack:
+	
+	pop r3 off stack r2
+	goto waiting using r4
+
+########################## ADD ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4, adds
+# the numbers and stores the result in r4 which is pushed onto
+# the value stack, and returns to waiting state
+add:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r4 := r4 + r1
+	push r4 on stack r3
+	goto waiting
+
+########################## SUB ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4, subracts
+# the numbers and stores the result in r4 which is pushed onto
+# the value stack, and returns to waiting state
+sub:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r4 := r4 - r1
+	push r4 on stack r3
+	goto waiting
+
+########################## MUL ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4, multiplies
+# the numbers and stores the result in r4 which is pushed onto
+# the value stack, and returns to waiting state
+mul:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r4 := r4 * r1
+	push r4 on stack r3
+	goto waiting
+
+########################## DIV ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4, divides
+# the numbers and stores the result in r4 which is pushed onto
+# the value stack, and returns to waiting state
+div:
+	goto check2 linking r5
+	pop r1 off stack r3 
+	if (r1 == 0) goto div_zero
+	pop r4 off stack r3
+	if (r4 <s 0) goto neg_num1 using r5
+	if (r1 <s 0) goto neg_num2 using r5
+	
+	r4 := r4 / r1 
+	push r4 on stack r3
+	goto waiting
+
+# Case if first value is negative, treats it as positive
+# and makes result negative
+neg_num1:
+	if (r1 <s 0) goto both_negative using r5
+	r4 := -r4
+	r4 := r4 / r1
+	r4 := -r4
+	push r4 on stack r3
+	goto waiting
+
+# Case if both values are negative treats both values as positive
+both_negative:
+	r1 := -r1
+	r4 := -r4
+	r4 := r4 / r1
+	push r4 on stack r3
+	goto waiting
+
+# Case if second value is negative, treats it as positive
+# and makes result negative
+neg_num2:
+	r1 := -r1
+	r4 := r4 / r1
+	r4 := -r4
+	push r4 on stack r3
+	goto waiting
+
+########################## OR ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4,
+# performs a bitwise or on the values and stores the result
+# in r4 which is pushed onto the value stack, and returns
+# to waiting state
+or:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r4 := r4 | r1
+	push r4 on stack r3
+	goto waiting
+
+########################## AND ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4,
+# performs a bitwise and on the values and stores the result
+# in r4 which is pushed onto the value stack, and returns
+# to waiting state
+and:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r4 := r4 & r1
+	push r4 on stack r3
+	goto waiting
+
+########################## CHANGE ############################
+# Checks if a value is on the value stack, pushes the last
+# value off the stack and stores it in r1, switches sign of
+# the value and puts it back onto the value stack and returns
+# to entering state
+change:
+	goto check1 linking r5
+	pop r1 off stack r3
+	r1 := -r1
+	push r1 on stack r3
+	goto waiting
+
+########################## COM ############################
+# Checks if a value is on the value stack, pushes the last
+# value off the stack and stores it in r1, performs a bitwise
+# comparison on the value and puts it back onto the value stack
+# and returns to waiting state
+com:
+	goto check1 linking r5
+	pop r1 off stack r3
+	r1 := ~r1
+	push r1 on stack r3
+	goto waiting
+
+########################## SWAP ############################
+# Checks if 2 values are on the value stack, pushes the last
+# two things off the stack and stores them in r1 and r4, uses r5
+# to hold r4 while r4 and r1 are swapped, and returns to waiting state
+swap:
+	goto check2 linking r5
+	pop r1 off stack r3
+	pop r4 off stack r3
+	r5 := r4
+	r4 := r1
+	push r4 on stack r3
+	r1 := r5
+	push r1 on stack r3
+	goto waiting
+	
+########################## DUP ############################
+# Checks if a value is on the value stack, pushes the last
+# thing off the stack and stores it in r1, pushing it on the
+# stack to the value is duplicated and returns to waiting state
+dup:
+	goto check1 linking r5
+	pop r1 off stack r3
+	push r1 on stack r3
+	push r1 on stack r3
+	goto waiting
+
+####################### POP_VSTACK ########################
+# Checks if a value is on the value stack, pops the last
+# thing off the stack and stores it in r4, returns to waiting state
+pop_vstack:
+	goto check1 linking r5
+	pop r4 off stack r3
+	goto waiting
+
+########################## REM ############################
+# Checks if a value is on the value stack, and recursively pops
+# the last thing off the stack and stores it in r4, until r3, the
+# stack pointer, is at the end of the stack returns to waiting state
+rem:
+	goto check1 linking r5
+
+rem_part_two:
+
+	if (r3 == endvstack) goto waiting using r5
+	pop r4 off stack r3
+	goto rem_part_two
+
+######################### CHECK1 ###########################
+# Checks if a value is on the value stack and returns to the label
+# location held in r5, pushing r3, r1, and r5 onto the call stack to
+# use as registers in failure comparison, otherwise outputs failure
+check1:
+	r4 := endvstack - r3
+	push r3 on stack r2
+	push r1 on stack r2
+	push r5 on stack r2
+	if (r4 <s 1) goto fail1 using r5, r1, r3
+	pop r5 off stack r2
+	pop r1 off stack r2
+	pop r3 off stack r2
+	goto r5
+
+######################### CHECK2 ###########################
+# Checks if two values are on the value stack and returns to the label
+# location held in r5, pushing r3, r1, and r5 onto the call stack to
+# use as registers in failure comparison, otherwise outputs failure
+check2:
+	r4 := endvstack - r3
+	push r3 on stack r2
+	push r1 on stack r2
+	push r5 on stack r2
+	if (r4 <s 2) goto fail2 using r5, r1, r3
+	pop r5 off stack r2
+	pop r1 off stack r2
+	pop r3 off stack r2
+	goto r5
+
+######################### FAIL1 ###########################
+# Pops off the values of r5, r1, and r3 off the call stack,
+# outputs failure message, and returns to waiting state
+fail1:
+	pop r5 off stack r2
+	pop r1 off stack r2
+	pop r3 off stack r2
+	output "Stack underflow---expected at least 1 element"
+	output 10
+	goto waiting
+
+######################### FAIL2 ###########################
+# Pops off the values of r5, r1, and r3 off the call stack,
+# outputs failure message, and returns to waiting state
+fail2:
+	pop r5 off stack r2
+	pop r1 off stack r2
+	pop r3 off stack r2
+	output "Stack underflow---expected at least 2 elements"
+	output 10
+	goto waiting
+
+###################### INPUT_ERROR ########################
+# Outputs unknown character message with character that is not
+# a supported command and returns to waiting state
+input_error:
+	output "Unknown character '"
+	r1 := r1
+	output r1
+	output "'\n"
+	goto waiting
+
+
+######################## DIV_ZERO #########################
+# Outputs division by zero message and returns to waiting state
+div_zero:
+	output "Division by zero"
+	output 10
+	goto waiting
+
+########################## END ############################
+# Pops r4 off the call stack, which holds location address to
+# return to call main, sets r1 to zero, and goes back to call main
+# to halt
+end:
+	pop r4 off stack r2
+	r1 := 0
+	goto r4

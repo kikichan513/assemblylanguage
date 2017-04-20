@@ -1,0 +1,35 @@
+.section text
+
+digit:
+	makedec linking r4
+	if (r2 != endstack) goto checkifdigit
+	if (r2 == endstack) push r1 on stack r2	
+
+	//does this get call
+	push r1 on stack r2
+	goto entering
+
+makedec:
+		r3 := r3 - 48
+		goto r4
+
+checkifdigit:
+	
+	if (m[r0][r2-1] == ' ') goto entering
+	if (m[r0][r2-1] != ' ') goto convertvalue
+
+convertvalue:
+	
+	pop r3 on stack r2
+	r3 := r3 * 10
+	r3 := r3 + r1
+	
+	push r3 on stack r2
+	goto entering
+
+add:
+		if (r2 !== endstack)
+		pop r5 of stack r2
+
+		if (r2 == endstack)
+

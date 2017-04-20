@@ -1,0 +1,58 @@
+.section text
+main:
+
+     r1 := jumptable
+     r3 := 0
+     goto jumpinit using r3
+     goto waiting
+
+.section rodata
+jumpinit:
+.temp r6, r7
+
+	m[r0][r3] := input_error
+	if (r3 == 256) goto waiting
+
+	if (r3 < 256) r3 := r3 + 1
+	goto jumpinit using r3
+
+waiting:
+     r1 := input()     
+     goto entering
+
+entering:
+     .temp r6, r7
+     r5 := jumptable + r1
+     r5 := m[r0][r5]
+     goto r5
+	
+jumptable:
+
+	.temp r6, r7
+	m[r0][jumptable + ''] := waiting
+	m[r0][jumptable + '0'] := digit 	
+	m[r0][jumptable + '1'] := digit 	
+	m[r0][jumptable + '2'] := digit 	
+	m[r0][jumptable + '3'] := digit 
+	m[r0][jumptable + '4'] := digit 	
+	m[r0][jumptable + '5'] := digit 	
+	m[r0][jumptable + '6'] := digit 
+	m[r0][jumptable + '7'] := digit 	
+	m[r0][jumptable + '8'] := digit 	
+	m[r0][jumptable + '9'] := digit
+ 	
+	m[r0][jumptable + 'n'] := push  	
+	m[r0][jumptable + ' '] := waiting	
+	m[r0][jumptable + '\n']:= print
+	m[r0][jumptable + '+'] := add 	
+	m[r0][jumptable + '-'] := sub 
+	m[r0][jumptable + '*'] := mul 
+	m[r0][jumptable + '/'] := div
+	m[r0][jumptable + '|']:= or	
+	m[r0][jumptable + '&'] := nand 	
+	m[r0][jumptable + 'c'] := change 
+	m[r0][jumptable + '~'] := com   	
+	m[r0][jumptable + 's'] := swap
+	m[r0][jumptable + 'd']:= dup	
+	m[r0][jumptable + 'p'] := pop 	
+	m[r0][jumptable + 'z'] := rem

@@ -1,0 +1,29 @@
+README for COMP 40 HW8
+Assembly-Language Programming: An RPN Calculator
+Dakota LeRoy and Chan Hiu Ki
+12/9/16
+
+1. Acknowledgements: Dakota LeRoy and Chan Hiu Ki have shared
+this assignment and have received assistance on these programs from several 
+excellent comp40 teaching assistants. Additionally, some sample code and
+most of the structure has been provided for us in the specification.
+
+2. Working Correctly/Incorrectly:
+From our testing, we believe our RPN calculator works and supports all
+commands correctly.
+
+3. Depatures from Recommended Calling Convention:
+Our program follows the recommended calling convention and design except
+that our waiting state is a separate label called by main rather than in
+callmain, and we implemented the call stack and value stack separately
+rather than as a single stack.
+
+4. Print Module:
+Our program's print module recursively calls the print label to traverse
+through the entire stack, where the print label calls separate recursive
+labels in our printd.ums file to traverse through each individual number
+on the stack.
+
+5. Time Spent: 
+We worked for approximately 9 hours analyzing, 5 hours writing assembly
+code, and approximately 4 hours debugging.

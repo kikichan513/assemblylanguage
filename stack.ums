@@ -1,0 +1,35 @@
+######################################################################
+#                                                                    #
+#      By Dakota LeRoy and Chan Hiu Ki, Thursday December 1st, 2016  #
+#      Assemly-Language Programming                                  #
+#                                                                    #
+#      stack.ums holds initalization of jumptable, call stack,       #
+#                          and value stack                           #
+#                                                                    #
+######################################################################
+# Registers                                                          #
+#       r2: holds call stack pointer                                 #
+#       r3: holds value stack pointer                                #
+#       r6: temporary register                                       #
+#       r7: temporary register                                       #
+######################################################################
+
+.section init
+.temps r6, r7
+r2 := endcstack
+r3 := endvstack
+
+# Allocates space for 100000 on the call stack
+.section call_stk
+.space 100000
+endcstack:
+
+# Allocates space for 100000 on the value stack
+.section val_stack
+.space 100000
+endvstack:
+
+# Allocates space for 256 in the jumptable for all ASCII characters
+.section rodata
+jumptable: 
+.space 256

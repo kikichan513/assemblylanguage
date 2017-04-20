@@ -1,0 +1,30 @@
+.section init
+.temps r6, r7
+	
+.section text
+print:
+	push r1 on stack r2
+	output "inside print"
+	output "\n"
+	output "inside print r5 should be 9: "
+	output r5
+	output "\n"
+	pop r1 off stack r2
+	goto r1
+
+//	if (r4 == 0) goto update_counter using r4 
+//	r5 := r4 mod 10            // 'Y' gets ones place
+
+//	r5 := r5 + 48              // makes 'Y' ascii
+//	output r5                  // prints 'Y'
+//	r4 := r4 / 10 		   // 'Y' gets 'X'/10
+//	goto print
+	
+ //update_counter:
+//	pop r4 off stack r2
+	
+//	goto iterate
+
+
+
+

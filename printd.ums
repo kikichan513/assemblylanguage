@@ -1,0 +1,115 @@
+#####################################################################
+#                                                                   #
+#      By Dakota LeRoy and Chan Hiu Ki, Thursday December 1st, 2016 #
+#      Assemly-Language Programming                                 #
+#                                                                   #
+#      printd.ums handles printing of each input on the value stack #
+#                                                                   #
+#####################################################################
+
+######################## CALLS PRINTING #############################
+#								    #
+#       	Sets up printing by pushing non-volatile            #
+#		registers onto the stack, freeing registers.        #
+#		Takes care of calling negative numbers of 0	    # 
+#							            #	
+#####################################################################
+# Registers:                                                        #
+#	r5: holds the actual multi-digit number                     #
+#	r1: is pushed onto stack to use as linker                   #
+#       r2: holds call stack pointer                                #
+#####################################################################
+.section text
+.temps r6, r7
+print1:
+	output ">>> "
+	if (r5 == 0) goto print_zero
+	
+	push r1 on stack r2
+	push r3 on stack r2
+	goto reverse_calc linking r1 
+	pop r1 off stack r2
+	goto r1
+
+# Case for printing zero prints a singular 0
+print_zero:
+	output 48
+	output 10
+	goto r1
+
+# Case for printing negative numbers treats value as positive and outputs
+# a '-' character before printing the value
+neg:	
+	output 45
+	r4 := -r5
+	r5 := -r5
+	goto continue_calc
+
+
+###################### DEC TO ASCII CONVERSION  #####################
+#								    #
+#       	Takes multi-digit number and separates each         #
+#		digit by moding 10 to grab the last digit           #
+#		and dividing to get the next digit to               #
+#		the left, calls itself recursively.  	            #
+#								    #	
+#####################################################################
+# Registers:                                                        #
+#	r5 holds the actual multi-digit number                      #
+#	r1 is pushed onto stack to use as linker for calling label  #
+#          neg                                                      #
+#####################################################################
+
+reverse_calc:
+	push r1 on stack r2
+	r4 := r5
+	r3 := 0
+	if (r5 <s 0) goto neg using r1
+	goto continue_calc 
+
+######################################################################
+# Registers:                                                         #
+#	r4 holds the outcome of the number after each recursive call #
+#	r4 will be divided by 10 and used as a base case             #
+#	r5 holds the right most digit of the number                  #
+#	r5 gets pushed on the stack so it can be popped off in       #
+#	in the correct order                                         #
+#       e.g. 3 2 1 stored in the stack can be popped as 1 2 3        #
+######################################################################
+
+continue_calc:
+	
+	if (r4 == 0) goto update_calc 
+	r5 := r5 mod 10
+	r5 := r5 + 48	
+	push r5 on stack r2
+	r3 := r3 + 1
+	r4 := r4 / 10	
+	r5 := r4
+	goto continue_calc  	
+
+############################ OUTPUTTING #############################
+#								    #
+#       	Takes care of outputting the values                 #
+#		in its correct order		  	            #
+#								    #	
+#####################################################################
+# Registers:                                                        #
+#	r5 holds each digit of the number                           #
+#	r3 holds the length of each digit for recursive iteration   #
+#	r1 holds location to call label print1                      #
+#####################################################################
+
+update_calc: 
+	if (r3 == 0) goto print_again 
+	pop r5 off stack r2
+	output r5
+	
+	r3 := r3 - 1
+	goto update_calc
+
+print_again:
+	output 10
+	pop r1 off stack r2
+	pop r3 off stack r2
+	goto r1

@@ -1,0 +1,80 @@
+#
+#      By Dakota LeRoy and Chan Hiu Ki, Thursday December 1st, 2016
+#      Assemly-Language Programming
+#
+#      printd.ums handles printing of each input on the value stack 
+#
+
+######################## CALLS PRINTING #############################
+#								    #
+#       	Sets up printing by pushing non-volatile            #
+#		registers onto the stack, freeing registers         #
+#								    #	
+#####################################################################
+
+.section text
+.temps r6, r7
+print1:
+	output ">>> "
+	if (r5 == 0) goto print_zero
+	
+	push r1 on stack r2
+	push r3 on stack r2
+	goto reverse_calc linking r1 
+	pop r1 off stack r2
+	goto r1
+
+print_zero:
+	output 48
+	output 10
+	goto r1
+
+
+####################### DEC TO ASCII CONVERSION  #############################
+#								    #
+#       	Sets up printing by pushing non-volatile            #
+#		registers onto the stack, freeing registers         #
+#								    #	
+#####################################################################
+
+reverse_calc:
+	push r1 on stack r2
+	r4 := r5
+	r3 := 0
+	if (r5 <s 0) goto neg using r1
+	goto continue_calc 
+	
+
+continue_calc:
+	
+	if (r4 == 0) goto update_calc 
+	r5 := r5 mod 10
+	r5 := r5 + 48	
+	push r5 on stack r2
+	r3 := r3 + 1
+
+	r4 := r4 / 10
+		
+	r5 := r4
+	goto continue_calc  	
+
+update_calc: 
+	if (r3 == 0) goto print_again 
+	pop r5 off stack r2
+	output r5
+	
+	r3 := r3 - 1
+	goto update_calc
+
+print_again:
+	output 10
+	pop r1 off stack r2
+	pop r3 off stack r2
+	goto r1
+
+neg:	
+	output 45
+	r4 := -r5
+	r5 := -r5
+	goto continue_calc
+
